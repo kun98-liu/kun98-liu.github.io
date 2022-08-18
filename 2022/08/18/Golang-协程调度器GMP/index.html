@@ -16,24 +16,29 @@
   <meta name="author" content="Liu Jiankun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
+    <meta name="description" content="Golang中的goroutine绝对算得上是Go语言最棒的设计。一句简单的go func就可以开启多线程编程的大门，体验极佳。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Golang-GC Tri-Color Marking">
-<meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/Golang-GC/index.html">
+<meta property="og:title" content="Golang-协程调度器GMP">
+<meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/Golang-%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8GMP/index.html">
 <meta property="og:site_name" content="kun98-liu">
-<meta property="og:description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
+<meta property="og:description" content="Golang中的goroutine绝对算得上是Go语言最棒的设计。一句简单的go func就可以开启多线程编程的大门，体验极佳。">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2022-08-18T07:42:53.000Z">
-<meta property="article:modified_time" content="2022-08-18T08:36:41.317Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201836265.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201938558.png">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/jpeg/26269664/1650776333419-50d3a922-bd53-4bff-b0b6-280e6abc5d74.jpeg?x-oss-process=image/watermark,type_d3F5LW1pY3JvaGVp,size_55,text_5YiY5Li55YawQWNlbGQ=,color_FFFFFF,shadow_50,t_80,g_se,x_10,y_10/resize,w_750,limit_0">
+<meta property="article:published_time" content="2022-08-18T08:35:29.000Z">
+<meta property="article:modified_time" content="2022-08-18T08:38:48.970Z">
 <meta property="article:author" content="Liu Jiankun">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Golang-GC Tri-Color Marking - kun98-liu</title>
+  <title>Golang-协程调度器GMP - kun98-liu</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -186,7 +191,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Golang-GC Tri-Color Marking"></span>
+            <span id="subtitle" data-typed-text="Golang-协程调度器GMP"></span>
           
         </div>
 
@@ -197,7 +202,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-08-18 16:42" pubdate>
+        <time datetime="2022-08-18 17:35" pubdate>
           August 18, 2022 pm
         </time>
       </span>
@@ -209,7 +214,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.1k words
+          1.8k words
         
       </span>
     
@@ -220,7 +225,7 @@
         
         
         
-          10 mins
+          16 mins
         
       </span>
     
@@ -266,74 +271,69 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Golang-GC Tri-Color Marking</h1>
+            <h1 style="display: none">Golang-协程调度器GMP</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="Golang-GC-Tri-Color-Marking"><a href="#Golang-GC-Tri-Color-Marking" class="headerlink" title="Golang-GC   Tri-Color Marking"></a><center>Golang-GC   Tri-Color Marking</center></h1><blockquote>
-<p>引言：</p>
+                <h1 id="Golang协程调度器"><a href="#Golang协程调度器" class="headerlink" title="Golang协程调度器"></a><center>Golang协程调度器</center></h1><h2 id="一、Go调度器的由来"><a href="#一、Go调度器的由来" class="headerlink" title="一、Go调度器的由来"></a>一、Go调度器的由来</h2><blockquote>
+<p> 引言：</p>
+<p>早期的单进程操作系统中，所有进程是顺序执行的，同一时刻只能有一个进程工作。</p>
+<p>单进程时代的两个问题：1. 单一执行流程， 2. 进程阻塞带来CPU浪费</p>
+<hr>
+<p>之后出现了多线程、多进程操作系统。CPU作为调度器，按时间片轮询所有线程，宏观上就实现了多进程同时执行。</p>
+<p>多线程解决了阻塞问题，但带来了新的问题，线程的上下文切换是有成本的。进程或线程越多，切换成本就越大，CPU的资源浪费就越严重。同时，大量的创建线程或进程会消耗大量内存。</p>
+</blockquote>
+<p>操作系统中，将一个线程内部分为用户态和内核态。那么，为啥那么不把这个线程一分为二，形成用户线程-内核线程的结构。我们开发者使用用户线程做接口调用之类的工作，内核线程来负责系统调用，管理硬件等。这样一个模型中，我们可以把内核空间的线程叫做Thread，而用户空间的线程就叫做协程 co-routine。</p>
+<img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
+
+
+
+<p>然而，如果是一个内核线程绑定一个协程，其实也并没有解决引言中所说的多线程带来的CPU浪费，内存浪费等问题。因此，在用户空间里，我们可以使用一个协程调度器，来管理多个协程，实现一个内核线程绑定多个协程。这个模型有点像Java NIO中的 Selector-Channel，我理解应该是同一种思想——多路复用嘛~</p>
+<img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201836265.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
+
+<p>再多考虑一步，如果有一个协程阻塞了，那么后面的协程会变得无法执行。为此，我们可以更大胆的设计多线程对应多协程的一个模型，图我就不放了。那么压力此时就来到了这个协程调度器上了。其实，这样的模型和Netty的workGroup用多线程处理更多的通道事件是一样的 。还是那个思想——多路复用来提高利用率。</p>
+<p>在Golang中，coroutine被改名为了goroutine，同时，一个goroutine的内存被控制在了4KB，因此Golang中可以创建超级大量的goroutine。  </p>
+<h2 id="二、Goroutine调度器的GMP模型"><a href="#二、Goroutine调度器的GMP模型" class="headerlink" title="二、Goroutine调度器的GMP模型"></a>二、Goroutine调度器的GMP模型</h2><h3 id="2-1-GMP模型简介"><a href="#2-1-GMP模型简介" class="headerlink" title="2.1 GMP模型简介"></a>2.1 GMP模型简介</h3><p>GMP实际上就是三个符号，G代表goroutine，P代表processor，M代表thread。</p>
+ <img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201938558.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
+
+
+
+<p>上图就是GMP模型的示意图了，针对图中各个部分，做以下说明：</p>
 <ul>
-<li><p>Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。</p>
-</li>
-<li><p>那么Go语言中的垃圾回收到底是怎么实现的呢？</p>
-<ul>
-<li>答：标记-清除。</li>
+<li>全局队列：存放等待运行的G</li>
+<li>P的本地队列：存放不超过256个的等待运行的G；优先将新创建的G放在P的本地队列，如果都满了就放在全局队列</li>
+<li>P列表：程序启动时创建；最多有GOMAXPROCS个，可以配置；</li>
+<li>M列表：操作系统分配给当前GO程序的内核线程数；可以通过SetMAXThreads函数设置；M有个线程池，可以在一个M阻塞时，创建一个新的M；在M空闲时，可以将该M回收</li>
+</ul>
+<h3 id="2-2-调度器的设计策略"><a href="#2-2-调度器的设计策略" class="headerlink" title="2.2 调度器的设计策略"></a>2.2 调度器的设计策略</h3><ul>
+<li>复用线程<ul>
+<li>目的：避免频繁创建和销毁线程M</li>
+<li>work stealing机制：当本线程无可运行的G时，先不销毁线程，而是从其他线程绑定的P里偷取G</li>
+<li>hand off机制： 当本线程因为G进行系统调用而阻塞时，该线程释放绑定的P，把P交给其他空闲的线程M继续执行</li>
 </ul>
 </li>
-<li><p>相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。</p>
+<li>利用并行<ul>
+<li>GOMAXPROCS设置P的数量，充分利用多核CPU，实现并行处理</li>
+</ul>
 </li>
-<li><p>其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS，G1的等垃圾回收器中。</p>
+<li>抢占<ul>
+<li>在coroutine中，一个协程要等待正在执行的另一个协程主动让出CPU才执行</li>
+<li>在go中，一个goroutine最多占用CPU10ms，然后就会被别的goroutine抢占CPU</li>
+</ul>
+</li>
+<li>全局G队列<ul>
+<li>当M执行work stealing时，如果从其他P偷不到G时，可以从全局队列获取G</li>
+</ul>
 </li>
 </ul>
-</blockquote>
-<h2 id="三色标记法-基本逻辑"><a href="#三色标记法-基本逻辑" class="headerlink" title="三色标记法 - 基本逻辑"></a>三色标记法 - 基本逻辑</h2><p>实际上，三色标记法就是用三种颜色来标记对象在可达性分析过程中的状态。按照我的理解，就是对存在于GCRoot中的对象进行BFS遍历。</p>
-<p>我们都知道在使用BFS的时候，需要用一个队列来模拟遍历过程。因此就有了三种颜色所表示的意义：</p>
-<blockquote>
-<ol>
-<li>黑色 - 已经从队列中poll出来了对象</li>
-<li>灰色 - 目前正在队列中的对象</li>
-<li>白色 - 还没有进过队列的对象</li>
-</ol>
-</blockquote>
-<p>整个三色标记的过程如下：</p>
-<blockquote>
-<ol>
-<li>所有对象初始均为白色</li>
-<li>从GCRoot开始，用BFS遍历对象，进入队列即标记为灰色。</li>
-<li>将灰色对象所引用的对象加入队列，弹出所有灰色对象并标记为黑色。进入队列的标为灰色。</li>
-<li>一直遍历直到没有新的对象能够加入队列。</li>
-<li>剩余的所有白色对象就是不可达的对象，GC会移除这些对象。</li>
-</ol>
-</blockquote>
-<h2 id="GolangGC中的一些实现细节-hybrid-write-barrier"><a href="#GolangGC中的一些实现细节-hybrid-write-barrier" class="headerlink" title="GolangGC中的一些实现细节 - hybrid write barrier"></a>GolangGC中的一些实现细节 - hybrid write barrier</h2><p>根据上述的有关三色标记法的基本逻辑，其实不难发现整个过程是必须要STW的。然而JVM中的GC早都实现了并发标记的功能了，Golang岂能不用并发标记？</p>
-<p>然而，使用并发标记，势必会在某些情况下出现问题，比如回收了合法的对象。总结来说，当以下两个条件同时被满足时，就会出现问题。</p>
-<blockquote>
-<ol>
-<li>黑色对象持有白色对象的引用</li>
-<li>另一个灰色对象也拥有这个白色对象的引用，但是这个引用被删除了。</li>
-</ol>
-</blockquote>
-<p>为了避免这两个条件被同时满足，Golang在v1.5版本设置了插入屏障和删除屏障。</p>
-<p><strong>插入屏障</strong>：把一个新的对象挂在某个对象下，直接标记这个新对象为灰色。</p>
-<p><strong>删除屏障</strong>：如果要删除一个对象的引用，如果这个对象是白色的就被标记为灰色。</p>
-<blockquote>
-<p>插入写屏障和删除写屏障的短板：</p>
-<ul>
-<li><p>插入写屏障：结束时需要STW来重新扫描栈，标记栈上引用的白色对象的存活； </p>
-</li>
-<li><p>删除写屏障：回收精度低，GC开始时STW扫描堆栈来记录初始快照，这个过程会保护开始时刻的所有存活对象。</p>
-</li>
-</ul>
-</blockquote>
-<p>Go V1.8版本引入了混合写屏障机制（hybrid write barrier），避免了对栈re-scan的过程，极大的减少了STW的时间。结合了两者的优点。</p>
-<p><strong>混合写屏障</strong>规则</p>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> GC开始将栈上的对象全部扫描并标记为黑色(之后不再进行第二次重复扫描，无需STW)，<br><span class="hljs-bullet">2.</span> GC期间，任何在栈上创建的新对象，均为黑色。<br><span class="hljs-bullet">3.</span> 被删除的对象标记为灰色。<br><span class="hljs-bullet">4.</span> 被添加的对象标记为灰色。<br></code></pre></td></tr></table></figure>
-
-
-
-
-
+<h3 id="2-3-go-func-经历了什么过程"><a href="#2-3-go-func-经历了什么过程" class="headerlink" title="2.3 go func() 经历了什么过程"></a>2.3 go func() 经历了什么过程</h3><p><img src="https://cdn.nlark.com/yuque/0/2022/jpeg/26269664/1650776333419-50d3a922-bd53-4bff-b0b6-280e6abc5d74.jpeg?x-oss-process=image/watermark,type_d3F5LW1pY3JvaGVp,size_55,text_5YiY5Li55YawQWNlbGQ=,color_FFFFFF,shadow_50,t_80,g_se,x_10,y_10/resize,w_750,limit_0" srcset="/img/loading.gif" lazyload></p>
+<p>​	1、我们通过 go func()来创建一个goroutine；</p>
+<p>​	2、有两个存储G的队列，一个是局部调度器P的本地队列、一个是全局G队列。新创建的G会先保存在P的本地队列中，如果P的本地队列已经满了就会保存在全局的队列中；</p>
+<p>​	3、G只能运行在M中，一个M必须持有一个P，M与P是1：1的关系。M会从P的本地队列弹出一个可执行状态的G来执行，如果P的本地队列为空，就会想其他的MP组合偷取一个可执行的G来执行；</p>
+<p>​	4、一个M调度G执行的过程是一个循环机制；</p>
+<p>​	5、当M执行某一个G时候如果发生了syscall或则其余阻塞操作，M会阻塞，如果当前有一些G在执行，runtime会把这个线程M从P中摘除(detach)，然后再创建一个新的操作系统的线程(如果有空闲的线程可用就复用空闲线程)来服务于这个P；</p>
+<p>​	6、当M系统调用结束时候，这个G会尝试获取一个空闲的P执行，并放入到这个P的本地队列。如果获取不到P，那么这个线程M变成休眠状态， 加入到空闲线程中，然后这个G会被放入全局队列中。</p>
 
                 
               </div>
@@ -358,8 +358,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Golang-GC Tri-Color Marking</div>
-      <div>http://kun98-liu.gihub.io/2022/08/18/Golang-GC/</div>
+      <div>Golang-协程调度器GMP</div>
+      <div>http://kun98-liu.gihub.io/2022/08/18/Golang-协程调度器GMP/</div>
     </div>
     <div class="license-meta">
       
@@ -401,15 +401,15 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/08/18/Spring-DispatcherServlet%E8%A7%A3%E6%9E%90/" title="Spring-SpringMVC的DispatcherServlet解析">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Spring-SpringMVC的DispatcherServlet解析</span>
-                        <span class="visible-mobile">Previous</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2022/08/18/DataStructure-Bitmap/" title="DataStructure-如何通过Bitmap实现亿级数据统计">
+                        <span class="hidden-mobile">DataStructure-如何通过Bitmap实现亿级数据统计</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>

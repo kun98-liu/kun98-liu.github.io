@@ -16,24 +16,24 @@
   <meta name="author" content="Liu Jiankun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
+    <meta name="description" content="Leetcode 208 Implement Trie (Prefix Tree)">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Golang-GC Tri-Color Marking">
-<meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/Golang-GC/index.html">
+<meta property="og:title" content="DataStructure-Trie前缀树">
+<meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/DataStructure-Trie%E5%89%8D%E7%BC%80%E6%A0%91/index.html">
 <meta property="og:site_name" content="kun98-liu">
-<meta property="og:description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
+<meta property="og:description" content="Leetcode 208 Implement Trie (Prefix Tree)">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2022-08-18T07:42:53.000Z">
-<meta property="article:modified_time" content="2022-08-18T08:36:41.317Z">
+<meta property="article:published_time" content="2022-08-18T08:22:23.000Z">
+<meta property="article:modified_time" content="2022-08-18T08:30:07.066Z">
 <meta property="article:author" content="Liu Jiankun">
-<meta property="article:tag" content="Golang">
+<meta property="article:tag" content="DataStructure">
 <meta name="twitter:card" content="summary_large_image">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Golang-GC Tri-Color Marking - kun98-liu</title>
+  <title>DataStructure-Trie前缀树 - kun98-liu</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -186,7 +186,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Golang-GC Tri-Color Marking"></span>
+            <span id="subtitle" data-typed-text="DataStructure-Trie前缀树"></span>
           
         </div>
 
@@ -197,7 +197,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-08-18 16:42" pubdate>
+        <time datetime="2022-08-18 17:22" pubdate>
           August 18, 2022 pm
         </time>
       </span>
@@ -209,7 +209,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.1k words
+          2.1k words
         
       </span>
     
@@ -220,7 +220,7 @@
         
         
         
-          10 mins
+          18 mins
         
       </span>
     
@@ -266,73 +266,36 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Golang-GC Tri-Color Marking</h1>
+            <h1 style="display: none">DataStructure-Trie前缀树</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="Golang-GC-Tri-Color-Marking"><a href="#Golang-GC-Tri-Color-Marking" class="headerlink" title="Golang-GC   Tri-Color Marking"></a><center>Golang-GC   Tri-Color Marking</center></h1><blockquote>
-<p>引言：</p>
+                <h1 id="前缀树-｜-Trie-｜-Prefix-Tree"><a href="#前缀树-｜-Trie-｜-Prefix-Tree" class="headerlink" title="前缀树 ｜ Trie ｜ Prefix Tree"></a>前缀树 ｜ Trie ｜ Prefix Tree</h1><p>前缀树，顾名思义，就是由前缀构成的一棵树。</p>
+<p>有什么用呢？</p>
 <ul>
-<li><p>Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。</p>
-</li>
-<li><p>那么Go语言中的垃圾回收到底是怎么实现的呢？</p>
-<ul>
-<li>答：标记-清除。</li>
+<li>搜索框里的自动补全</li>
+<li>拼写检查</li>
+<li>9键键盘的单词预测，比如输入 hello，后面提示world</li>
 </ul>
-</li>
-<li><p>相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。</p>
-</li>
-<li><p>其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS，G1的等垃圾回收器中。</p>
-</li>
-</ul>
+<p>这些都是前缀树的应用。</p>
+<p>简单的来说，就是将很多不同的字符串，放到同一棵树里，前缀相同的部分构成一个前缀树的节点。</p>
+<p>比如，apple 和 application，就可以变成 appl -&gt; e 和 appl -&gt; ication。</p>
+<h2 id="LeetCode-相关题目"><a href="#LeetCode-相关题目" class="headerlink" title="LeetCode 相关题目"></a>LeetCode 相关题目</h2><blockquote>
+<p>208 Implement Trie (Prefix Tree)</p>
+<p>211 Design Add and Search Words Data Structure</p>
 </blockquote>
-<h2 id="三色标记法-基本逻辑"><a href="#三色标记法-基本逻辑" class="headerlink" title="三色标记法 - 基本逻辑"></a>三色标记法 - 基本逻辑</h2><p>实际上，三色标记法就是用三种颜色来标记对象在可达性分析过程中的状态。按照我的理解，就是对存在于GCRoot中的对象进行BFS遍历。</p>
-<p>我们都知道在使用BFS的时候，需要用一个队列来模拟遍历过程。因此就有了三种颜色所表示的意义：</p>
-<blockquote>
-<ol>
-<li>黑色 - 已经从队列中poll出来了对象</li>
-<li>灰色 - 目前正在队列中的对象</li>
-<li>白色 - 还没有进过队列的对象</li>
-</ol>
-</blockquote>
-<p>整个三色标记的过程如下：</p>
-<blockquote>
-<ol>
-<li>所有对象初始均为白色</li>
-<li>从GCRoot开始，用BFS遍历对象，进入队列即标记为灰色。</li>
-<li>将灰色对象所引用的对象加入队列，弹出所有灰色对象并标记为黑色。进入队列的标为灰色。</li>
-<li>一直遍历直到没有新的对象能够加入队列。</li>
-<li>剩余的所有白色对象就是不可达的对象，GC会移除这些对象。</li>
-</ol>
-</blockquote>
-<h2 id="GolangGC中的一些实现细节-hybrid-write-barrier"><a href="#GolangGC中的一些实现细节-hybrid-write-barrier" class="headerlink" title="GolangGC中的一些实现细节 - hybrid write barrier"></a>GolangGC中的一些实现细节 - hybrid write barrier</h2><p>根据上述的有关三色标记法的基本逻辑，其实不难发现整个过程是必须要STW的。然而JVM中的GC早都实现了并发标记的功能了，Golang岂能不用并发标记？</p>
-<p>然而，使用并发标记，势必会在某些情况下出现问题，比如回收了合法的对象。总结来说，当以下两个条件同时被满足时，就会出现问题。</p>
-<blockquote>
-<ol>
-<li>黑色对象持有白色对象的引用</li>
-<li>另一个灰色对象也拥有这个白色对象的引用，但是这个引用被删除了。</li>
-</ol>
-</blockquote>
-<p>为了避免这两个条件被同时满足，Golang在v1.5版本设置了插入屏障和删除屏障。</p>
-<p><strong>插入屏障</strong>：把一个新的对象挂在某个对象下，直接标记这个新对象为灰色。</p>
-<p><strong>删除屏障</strong>：如果要删除一个对象的引用，如果这个对象是白色的就被标记为灰色。</p>
-<blockquote>
-<p>插入写屏障和删除写屏障的短板：</p>
-<ul>
-<li><p>插入写屏障：结束时需要STW来重新扫描栈，标记栈上引用的白色对象的存活； </p>
-</li>
-<li><p>删除写屏障：回收精度低，GC开始时STW扫描堆栈来记录初始快照，这个过程会保护开始时刻的所有存活对象。</p>
-</li>
-</ul>
-</blockquote>
-<p>Go V1.8版本引入了混合写屏障机制（hybrid write barrier），避免了对栈re-scan的过程，极大的减少了STW的时间。结合了两者的优点。</p>
-<p><strong>混合写屏障</strong>规则</p>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> GC开始将栈上的对象全部扫描并标记为黑色(之后不再进行第二次重复扫描，无需STW)，<br><span class="hljs-bullet">2.</span> GC期间，任何在栈上创建的新对象，均为黑色。<br><span class="hljs-bullet">3.</span> 被删除的对象标记为灰色。<br><span class="hljs-bullet">4.</span> 被添加的对象标记为灰色。<br></code></pre></td></tr></table></figure>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>首先，设计一棵树，肯定要从节点开始。</p>
+<h3 id="TrieNode"><a href="#TrieNode" class="headerlink" title="TrieNode"></a>TrieNode</h3><p>在这里，我们规定所有放入前缀树的字符串都是lowercase的字母。</p>
+<p>那么，在每一个节点上，就可以记录会出现的子节点的字母，为了方便进行遍历，可以使用一个长度为26的TrieNode[]数组来记录。根据当前的<code>char - &#39;a&#39;</code> 这个index就可以获得下一层的节点。</p>
+<p>此外，还需要记录，该节点是否是最后一个字母。当然通过遍历当前节点的TrieNode[] 数组也是可以判断是否为end，但是那样也太麻烦了。</p>
+<p>然后，再提供一些方法供调用。</p>
+<p>TrieNode类如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TrieNode</span>&#123;<br>    <br>    <span class="hljs-type">boolean</span> isEnd;<br>    <br>    <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">R</span> <span class="hljs-operator">=</span> <span class="hljs-number">26</span>;<br>    <br>    TrieNode[] links;<span class="hljs-comment">//相当于二叉树里的 TreeNode left, TreeNode right。</span><br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">TrieNode</span><span class="hljs-params">()</span>&#123;<br>        links = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TrieNode</span>[R];<span class="hljs-comment">//创建每个节点，都要分配这个数组</span><br>    &#125;<br>    <br>    <span class="hljs-comment">//判断当前节点有没有被ch这个字符连接</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">containsKey</span><span class="hljs-params">(<span class="hljs-type">char</span> ch)</span>&#123;<br>        <span class="hljs-keyword">return</span> links[ch - <span class="hljs-string">&#x27;a&#x27;</span>] != <span class="hljs-literal">null</span>;<br>    &#125;<br>    <br>    <span class="hljs-comment">//在当前节点，获得字符为ch的下一个节点。</span><br>    <span class="hljs-keyword">public</span> TrieNode <span class="hljs-title function_">get</span><span class="hljs-params">(<span class="hljs-type">char</span> ch)</span>&#123;<br>        <span class="hljs-keyword">return</span> links[ch - <span class="hljs-string">&#x27;a&#x27;</span>];<br>    &#125;<br>    <br>    <span class="hljs-comment">//添加下一个字符为ch的节点，并连接到这个树上</span><br>    <span class="hljs-comment">//也就是在数组里赋值上这个新节点</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">put</span><span class="hljs-params">(<span class="hljs-type">char</span> ch, TrieNode node)</span>&#123;<br>        links[ch - <span class="hljs-string">&#x27;a&#x27;</span>] = node;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isEnd</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">return</span> isEnd;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setEnd</span><span class="hljs-params">()</span>&#123;<br>        isEnd = <span class="hljs-literal">true</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 
 
-
+<h3 id="Trie"><a href="#Trie" class="headerlink" title="Trie"></a>Trie</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Trie</span> &#123;<br>    <span class="hljs-comment">//树的根节点，实际上的作用就相当于dummyNode,不表示值，但含有所有首字母的link</span><br>    <span class="hljs-keyword">private</span> TrieNode root;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Trie</span><span class="hljs-params">()</span> &#123;<br>        root =<span class="hljs-keyword">new</span> <span class="hljs-title class_">TrieNode</span>();<br>    &#125;<br>    <br>    <span class="hljs-comment">//把一段字符串放进前缀树里</span><br>    <span class="hljs-comment">//遍历字符串，一个字符一个节点。</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">insert</span><span class="hljs-params">(String word)</span> &#123;<br>        <span class="hljs-type">TrieNode</span> <span class="hljs-variable">node</span> <span class="hljs-operator">=</span> root;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span> ; i &lt; word.length(); i++)&#123;<br>            <span class="hljs-type">char</span> <span class="hljs-variable">curCh</span> <span class="hljs-operator">=</span> word.charAt(i);<br>            <span class="hljs-keyword">if</span>(!node.containsKey(curCh))&#123;<br>                node.put(curCh, <span class="hljs-keyword">new</span> <span class="hljs-title class_">TrieNode</span>());<span class="hljs-comment">//links数组里没有这个字符，就新建一个并加入树</span><br>            &#125;<br>            node = node.get(curCh);<span class="hljs-comment">//向下遍历</span><br>        &#125;<br>        <br>        node.setEnd();<span class="hljs-comment">//遍历完，设置当前节点为end</span><br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">search</span><span class="hljs-params">(String word)</span> &#123;<br>        <span class="hljs-type">TrieNode</span> <span class="hljs-variable">res</span> <span class="hljs-operator">=</span> searchPrefix(word);<br>        <br>        <span class="hljs-keyword">return</span> res != <span class="hljs-literal">null</span> &amp;&amp; res.isEnd();<br>        <br>    &#125;<br>    <br>    <span class="hljs-keyword">private</span> TrieNode <span class="hljs-title function_">searchPrefix</span><span class="hljs-params">(String word)</span> &#123;<br>        <span class="hljs-type">TrieNode</span> <span class="hljs-variable">node</span> <span class="hljs-operator">=</span> root;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span> ; i &lt; word.length(); i++) &#123;<br>            <span class="hljs-type">char</span> <span class="hljs-variable">curCh</span> <span class="hljs-operator">=</span> word.charAt(i);<br>            <span class="hljs-keyword">if</span>(node.containsKey(curCh))&#123;<br>                node = node.get(curCh);<br>            &#125;<span class="hljs-keyword">else</span>&#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>            &#125;<br>        &#125;<br>        <br>        <span class="hljs-keyword">return</span> node;<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">startsWith</span><span class="hljs-params">(String prefix)</span> &#123;<br>        <span class="hljs-type">TrieNode</span> <span class="hljs-variable">node</span> <span class="hljs-operator">=</span> searchPrefix(prefix);<br>        <span class="hljs-keyword">return</span> node != <span class="hljs-literal">null</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 
                 
@@ -346,7 +309,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Golang/">#Golang</a>
+        <a href="/tags/DataStructure/">#DataStructure</a>
       
     </div>
   
@@ -358,8 +321,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Golang-GC Tri-Color Marking</div>
-      <div>http://kun98-liu.gihub.io/2022/08/18/Golang-GC/</div>
+      <div>DataStructure-Trie前缀树</div>
+      <div>http://kun98-liu.gihub.io/2022/08/18/DataStructure-Trie前缀树/</div>
     </div>
     <div class="license-meta">
       
@@ -401,15 +364,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/08/18/Spring-DispatcherServlet%E8%A7%A3%E6%9E%90/" title="Spring-SpringMVC的DispatcherServlet解析">
+                      <a href="/2022/08/18/DataStructure-Bitmap/" title="DataStructure-如何通过Bitmap实现亿级数据统计">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Spring-SpringMVC的DispatcherServlet解析</span>
+                        <span class="hidden-mobile">DataStructure-如何通过Bitmap实现亿级数据统计</span>
                         <span class="visible-mobile">Previous</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2022/08/18/Netty-Java-NIO/" title="Netty-Netty的底层实现：JavaNIO">
+                        <span class="hidden-mobile">Netty-Netty的底层实现：JavaNIO</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
