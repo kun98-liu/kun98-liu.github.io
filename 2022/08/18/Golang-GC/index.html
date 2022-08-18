@@ -16,23 +16,24 @@
   <meta name="author" content="Liu Jiankun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+    <meta name="description" content="Golang-GC   Tri-Color Marking 引言：  Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。  那么Go语言中的垃圾回收到底是怎么实现的呢？  答：标记-清除。   相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。  其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://example.com/2022/08/18/hello-world/index.html">
+<meta property="og:title" content="Golang-GC">
+<meta property="og:url" content="http://example.com/2022/08/18/Golang-GC/index.html">
 <meta property="og:site_name" content="kun98-liu">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="Golang-GC   Tri-Color Marking 引言：  Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。  那么Go语言中的垃圾回收到底是怎么实现的呢？  答：标记-清除。   相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。  其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS">
 <meta property="og:locale">
-<meta property="article:published_time" content="2022-08-18T05:43:22.240Z">
-<meta property="article:modified_time" content="2022-08-18T05:43:22.241Z">
+<meta property="article:published_time" content="2022-08-18T07:42:53.000Z">
+<meta property="article:modified_time" content="2022-08-18T07:45:00.601Z">
 <meta property="article:author" content="Liu Jiankun">
+<meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Hello World - kun98-liu</title>
+  <title>Golang-GC - kun98-liu</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -185,7 +186,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Hello World"></span>
+            <span id="subtitle" data-typed-text="Golang-GC"></span>
           
         </div>
 
@@ -196,7 +197,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-08-18 14:43" pubdate>
+        <time datetime="2022-08-18 16:42" pubdate>
           August 18, 2022 pm
         </time>
       </span>
@@ -208,7 +209,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          367 wörter
+          1.1k wörter
         
       </span>
     
@@ -219,7 +220,7 @@
         
         
         
-          4 minuten
+          10 minuten
         
       </span>
     
@@ -265,24 +266,74 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Hello World</h1>
+            <h1 style="display: none">Golang-GC</h1>
             
             
               <div class="markdown-body">
                 
-                <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
+                <h1 id="Golang-GC-Tri-Color-Marking"><a href="#Golang-GC-Tri-Color-Marking" class="headerlink" title="Golang-GC   Tri-Color Marking"></a><center>Golang-GC   Tri-Color Marking</center></h1><blockquote>
+<p>引言：</p>
+<ul>
+<li><p>Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。</p>
+</li>
+<li><p>那么Go语言中的垃圾回收到底是怎么实现的呢？</p>
+<ul>
+<li>答：标记-清除。</li>
+</ul>
+</li>
+<li><p>相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。</p>
+</li>
+<li><p>其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS，G1的等垃圾回收器中。</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="三色标记法-基本逻辑"><a href="#三色标记法-基本逻辑" class="headerlink" title="三色标记法 - 基本逻辑"></a>三色标记法 - 基本逻辑</h2><p>实际上，三色标记法就是用三种颜色来标记对象在可达性分析过程中的状态。按照我的理解，就是对存在于GCRoot中的对象进行BFS遍历。</p>
+<p>我们都知道在使用BFS的时候，需要用一个队列来模拟遍历过程。因此就有了三种颜色所表示的意义：</p>
+<blockquote>
+<ol>
+<li>黑色 - 已经从队列中poll出来了对象</li>
+<li>灰色 - 目前正在队列中的对象</li>
+<li>白色 - 还没有进过队列的对象</li>
+</ol>
+</blockquote>
+<p>整个三色标记的过程如下：</p>
+<blockquote>
+<ol>
+<li>所有对象初始均为白色</li>
+<li>从GCRoot开始，用BFS遍历对象，进入队列即标记为灰色。</li>
+<li>将灰色对象所引用的对象加入队列，弹出所有灰色对象并标记为黑色。进入队列的标为灰色。</li>
+<li>一直遍历直到没有新的对象能够加入队列。</li>
+<li>剩余的所有白色对象就是不可达的对象，GC会移除这些对象。</li>
+</ol>
+</blockquote>
+<h2 id="GolangGC中的一些实现细节-hybrid-write-barrier"><a href="#GolangGC中的一些实现细节-hybrid-write-barrier" class="headerlink" title="GolangGC中的一些实现细节 - hybrid write barrier"></a>GolangGC中的一些实现细节 - hybrid write barrier</h2><p>根据上述的有关三色标记法的基本逻辑，其实不难发现整个过程是必须要STW的。然而JVM中的GC早都实现了并发标记的功能了，Golang岂能不用并发标记？</p>
+<p>然而，使用并发标记，势必会在某些情况下出现问题，比如回收了合法的对象。总结来说，当以下两个条件同时被满足时，就会出现问题。</p>
+<blockquote>
+<ol>
+<li>黑色对象持有白色对象的引用</li>
+<li>另一个灰色对象也拥有这个白色对象的引用，但是这个引用被删除了。</li>
+</ol>
+</blockquote>
+<p>为了避免这两个条件被同时满足，Golang在v1.5版本设置了插入屏障和删除屏障。</p>
+<p><strong>插入屏障</strong>：把一个新的对象挂在某个对象下，直接标记这个新对象为灰色。</p>
+<p><strong>删除屏障</strong>：如果要删除一个对象的引用，如果这个对象是白色的就被标记为灰色。</p>
+<blockquote>
+<p>插入写屏障和删除写屏障的短板：</p>
+<ul>
+<li><p>插入写屏障：结束时需要STW来重新扫描栈，标记栈上引用的白色对象的存活； </p>
+</li>
+<li><p>删除写屏障：回收精度低，GC开始时STW扫描堆栈来记录初始快照，这个过程会保护开始时刻的所有存活对象。</p>
+</li>
+</ul>
+</blockquote>
+<p>Go V1.8版本引入了混合写屏障机制（hybrid write barrier），避免了对栈re-scan的过程，极大的减少了STW的时间。结合了两者的优点。</p>
+<p><strong>混合写屏障</strong>规则</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> GC开始将栈上的对象全部扫描并标记为黑色(之后不再进行第二次重复扫描，无需STW)，<br><span class="hljs-bullet">2.</span> GC期间，任何在栈上创建的新对象，均为黑色。<br><span class="hljs-bullet">3.</span> 被删除的对象标记为灰色。<br><span class="hljs-bullet">4.</span> 被添加的对象标记为灰色。<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+
 
                 
               </div>
@@ -292,6 +343,13 @@
               <div class="post-metas my-3">
   
   
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Golang/">#Golang</a>
+      
+    </div>
+  
 </div>
 
 
@@ -300,8 +358,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Hello World</div>
-      <div>http://example.com/2022/08/18/hello-world/</div>
+      <div>Golang-GC</div>
+      <div>http://example.com/2022/08/18/Golang-GC/</div>
     </div>
     <div class="license-meta">
       
@@ -343,15 +401,15 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/08/18/Golang-GC/" title="Golang-GC">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Golang-GC</span>
-                        <span class="visible-mobile">Vorheriger</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2022/08/18/hello-world/" title="Hello World">
+                        <span class="hidden-mobile">Hello World</span>
+                        <span class="visible-mobile">Nächster</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>

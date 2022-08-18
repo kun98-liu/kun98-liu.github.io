@@ -106,7 +106,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/">
                 <i class="iconfont icon-home-fill"></i>
-                Home
+                Startseite
               </a>
             </li>
           
@@ -118,7 +118,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/archives/">
                 <i class="iconfont icon-archive-fill"></i>
-                Archives
+                Archiv
               </a>
             </li>
           
@@ -130,7 +130,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/tags/">
                 <i class="iconfont icon-tags-fill"></i>
-                Tags
+                Schlagwörter
               </a>
             </li>
           
@@ -142,7 +142,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
-                About
+                Über
               </a>
             </li>
           
@@ -213,6 +213,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2022/08/18/Golang-GC/" target="_self">
+          Golang-GC
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2022/08/18/Golang-GC/" target="_self">
+        <div>
+          Golang-GC   Tri-Color Marking 引言：  Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。  那么Go语言中的垃圾回收到底是怎么实现的呢？  答：标记-清除。   相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。  其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2022-08-18 16:42" pubdate>
+              2022-08-18
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Golang/">#Golang</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2022/08/18/hello-world/" target="_self">
           Hello World
         </a>
@@ -263,7 +303,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header text-center">
-        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <h4 class="modal-title w-100 font-weight-bold">Suchen</h4>
         <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -271,7 +311,7 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Stichwort</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
@@ -357,7 +397,7 @@
   
 
   <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+    <div class="noscript-warning">Blog funktioniert am besten mit aktiviertem JavaScript</div>
   </noscript>
 </body>
 </html>
