@@ -16,15 +16,15 @@
   <meta name="author" content="Liu Jiankun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Golang-GC   Tri-Color Marking 引言：  Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。  那么Go语言中的垃圾回收到底是怎么实现的呢？  答：标记-清除。   相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。  其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS">
+    <meta name="description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Golang-GC">
 <meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/Golang-GC/index.html">
 <meta property="og:site_name" content="kun98-liu">
-<meta property="og:description" content="Golang-GC   Tri-Color Marking 引言：  Go语言的一大特点就是其提供的垃圾回收机制，对于我这样的没有用过C++的初学者而言，简直是一个福音。  那么Go语言中的垃圾回收到底是怎么实现的呢？  答：标记-清除。   相比于JVM中各种眼花缭乱的垃圾回收器和多种垃圾回收机制，Go提供的就是标记-清除型的GC。  其中，标记采用的是三色标记法，这种方法也用在了JVM的CMS">
+<meta property="og:description" content="Golang是一个带有垃圾回收器的语言。Go的GC采用了三色标记法实现并发标记">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2022-08-18T07:42:53.000Z">
-<meta property="article:modified_time" content="2022-08-18T07:45:00.601Z">
+<meta property="article:modified_time" content="2022-08-18T07:53:38.427Z">
 <meta property="article:author" content="Liu Jiankun">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary_large_image">
