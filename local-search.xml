@@ -4,6 +4,27 @@
   
   
   <entry>
+    <title>6.824-lab1</title>
+    <link href="/2022/09/13/6-824-lab1/"/>
+    <url>/2022/09/13/6-824-lab1/</url>
+    
+    <content type="html"><![CDATA[<h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><h3 id="lab1-内容"><a href="#lab1-内容" class="headerlink" title="lab1 内容"></a>lab1 内容</h3><p>实现一个MapReduce程序。</p><ul><li>程序入口在main文件夹下, main&#x2F;mrcoordinator.go, main&#x2F;mrworker.go</li><li>需要编写的代码在mr文件夹下，mr&#x2F;coordinator.go, mr&#x2F;worker.go, mr&#x2F;rpc.go</li></ul><h3 id="lab1-分析"><a href="#lab1-分析" class="headerlink" title="lab1 分析"></a>lab1 分析</h3><p>开始动手写代码之前，必须先把整体框架了解清楚。可以参照mapreduce论文中的架构图。</p><ul><li>首先，从main包入手。<ul><li>mrcoordinator.go为协调器的main入口，其中会调用mr.MakeCoordinator方法生成我们自定义的协调器，并且会循环调用Done()方法来持续检查是否完成所有Task</li><li>mrworker.go为worker的的main入口，其中会加载mrapps文件夹下的mr插件（plugins），之后调用我们自定义的Worker的worker方法。且根据lab要求，worker要单起一个进程，那么Worker方法中则应该采用同步的方式执行task，而不是异步或多线程的执行任务</li></ul></li><li>进入mr文件夹下<ul><li>coordinator.go<ul><li>MakeCoordinator方法会创建Coordinator然后调用serve方法，创建goroutine处理RPC</li><li>我们需要实现协调器的功能主要就是亮点：1、向worker分发任务，2、管理任务状态，3、管理超时任务</li></ul></li><li>worker.go<ul><li>在Worker方法中，我们需要让该worker以循环的方式向协调器索取Task来执行，根据Task类型的不同执行不同的方法。</li><li>尽管worker应该以阻塞的方式执行task，但没必要再执行完task后通知协调器任务完成的这一个动作也阻塞。所以，通知协调器task完成可以用go func异步的来通知，让主线程继续要task来做。</li></ul></li><li>rpc.go<ul><li>学习lab中给的Example代码，自定义Args和Reply用于RPC调用中的数据保存。第一次看到这种用法，是真的帅。</li></ul></li></ul></li></ul><h3 id="lab1-总结"><a href="#lab1-总结" class="headerlink" title="lab1 总结"></a>lab1 总结</h3><ul><li>一开始看这个lab一头雾水，不知何处下手。其实关键在于对照着论文里的那个图，并结合lab的说明，分析清楚这个lab的结构。</li><li>虽然是协调器来分发任务，但实际上这个的主动权应该在worker手里。协调器管的功能应该是管好任务的状态，判断超时，判断任务是否全部做完。</li><li>除了获取任务，做任务之外，其他功能都可以做成异步的。比如，协调器派送任务后启动新线程判断超时，worker完成任务后启动新线程通知协调器任务完成。</li></ul><p>做完这个lab后，感觉没有多复杂，然而其实一共写了有5个小时，总共断断续续用了两天。<br>当中大部分的时间都是处在一个完全没有头绪的状态，只得反复的看lab的说明，看代码中的example，借鉴别人的实现。<br>论文写的很清楚，课程讲的也不难，然而想法落地成代码还是一个很困难的事。<br>还是得多学，多写，多总结。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Distributed System</tag>
+      
+      <tag>MIT6.824</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Golang-协程调度器GMP</title>
     <link href="/2022/08/18/Golang-%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8GMP/"/>
     <url>/2022/08/18/Golang-%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8GMP/</url>

@@ -16,29 +16,25 @@
   <meta name="author" content="Liu Jiankun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Golang中的goroutine绝对算得上是Go语言最棒的设计。一句简单的go func就可以开启多线程编程的大门，体验极佳。">
+    <meta name="description" content="MIT 6.824的lab1笔记">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Golang-协程调度器GMP">
-<meta property="og:url" content="http://kun98-liu.gihub.io/2022/08/18/Golang-%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8GMP/index.html">
+<meta property="og:title" content="6.824-lab1">
+<meta property="og:url" content="http://kun98-liu.gihub.io/2022/09/13/6-824-lab1/index.html">
 <meta property="og:site_name" content="kun98-liu">
-<meta property="og:description" content="Golang中的goroutine绝对算得上是Go语言最棒的设计。一句简单的go func就可以开启多线程编程的大门，体验极佳。">
+<meta property="og:description" content="MIT 6.824的lab1笔记">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201836265.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201938558.png">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/jpeg/26269664/1650776333419-50d3a922-bd53-4bff-b0b6-280e6abc5d74.jpeg?x-oss-process=image/watermark,type_d3F5LW1pY3JvaGVp,size_55,text_5YiY5Li55YawQWNlbGQ=,color_FFFFFF,shadow_50,t_80,g_se,x_10,y_10/resize,w_750,limit_0">
-<meta property="article:published_time" content="2022-08-18T08:35:29.000Z">
-<meta property="article:modified_time" content="2022-08-18T08:38:48.970Z">
+<meta property="article:published_time" content="2022-09-13T07:00:55.000Z">
+<meta property="article:modified_time" content="2022-09-13T07:04:21.188Z">
 <meta property="article:author" content="Liu Jiankun">
-<meta property="article:tag" content="Golang">
+<meta property="article:tag" content="Distributed System">
+<meta property="article:tag" content="MIT6.824">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Golang-协程调度器GMP - kun98-liu</title>
+  <title>6.824-lab1 - kun98-liu</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -191,7 +187,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Golang-协程调度器GMP"></span>
+            <span id="subtitle" data-typed-text="6.824-lab1"></span>
           
         </div>
 
@@ -202,8 +198,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-08-18 17:35" pubdate>
-          August 18, 2022 pm
+        <time datetime="2022-09-13 16:00" pubdate>
+          September 13, 2022 pm
         </time>
       </span>
     
@@ -214,7 +210,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.8k words
+          1.2k words
         
       </span>
     
@@ -225,7 +221,7 @@
         
         
         
-          16 mins
+          10 mins
         
       </span>
     
@@ -271,69 +267,47 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Golang-协程调度器GMP</h1>
+            <h1 style="display: none">6.824-lab1</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="Golang协程调度器"><a href="#Golang协程调度器" class="headerlink" title="Golang协程调度器"></a><center>Golang协程调度器</center></h1><h2 id="一、Go调度器的由来"><a href="#一、Go调度器的由来" class="headerlink" title="一、Go调度器的由来"></a>一、Go调度器的由来</h2><blockquote>
-<p> 引言：</p>
-<p>早期的单进程操作系统中，所有进程是顺序执行的，同一时刻只能有一个进程工作。</p>
-<p>单进程时代的两个问题：1. 单一执行流程， 2. 进程阻塞带来CPU浪费</p>
-<hr>
-<p>之后出现了多线程、多进程操作系统。CPU作为调度器，按时间片轮询所有线程，宏观上就实现了多进程同时执行。</p>
-<p>多线程解决了阻塞问题，但带来了新的问题，线程的上下文切换是有成本的。进程或线程越多，切换成本就越大，CPU的资源浪费就越严重。同时，大量的创建线程或进程会消耗大量内存。</p>
-</blockquote>
-<p>操作系统中，将一个线程内部分为用户态和内核态。那么，为啥那么不把这个线程一分为二，形成用户线程-内核线程的结构。我们开发者使用用户线程做接口调用之类的工作，内核线程来负责系统调用，管理硬件等。这样一个模型中，我们可以把内核空间的线程叫做Thread，而用户空间的线程就叫做协程 co-routine。</p>
-<img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201832728.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
-
-
-
-<p>然而，如果是一个内核线程绑定一个协程，其实也并没有解决引言中所说的多线程带来的CPU浪费，内存浪费等问题。因此，在用户空间里，我们可以使用一个协程调度器，来管理多个协程，实现一个内核线程绑定多个协程。这个模型有点像Java NIO中的 Selector-Channel，我理解应该是同一种思想——多路复用嘛~</p>
-<img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201836265.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
-
-<p>再多考虑一步，如果有一个协程阻塞了，那么后面的协程会变得无法执行。为此，我们可以更大胆的设计多线程对应多协程的一个模型，图我就不放了。那么压力此时就来到了这个协程调度器上了。其实，这样的模型和Netty的workGroup用多线程处理更多的通道事件是一样的 。还是那个思想——多路复用来提高利用率。</p>
-<p>在Golang中，coroutine被改名为了goroutine，同时，一个goroutine的内存被控制在了4KB，因此Golang中可以创建超级大量的goroutine。  </p>
-<h2 id="二、Goroutine调度器的GMP模型"><a href="#二、Goroutine调度器的GMP模型" class="headerlink" title="二、Goroutine调度器的GMP模型"></a>二、Goroutine调度器的GMP模型</h2><h3 id="2-1-GMP模型简介"><a href="#2-1-GMP模型简介" class="headerlink" title="2.1 GMP模型简介"></a>2.1 GMP模型简介</h3><p>GMP实际上就是三个符号，G代表goroutine，P代表processor，M代表thread。</p>
- <img src="https://raw.githubusercontent.com/kun98-liu/MyPicGo/main/202205201938558.png" srcset="/img/loading.gif" lazyload style="zoom:67%;" />
-
-
-
-<p>上图就是GMP模型的示意图了，针对图中各个部分，做以下说明：</p>
+                <h1 id="6-824-lab1"><a href="#6-824-lab1" class="headerlink" title="6.824 - lab1"></a>6.824 - lab1</h1><h3 id="lab1-内容"><a href="#lab1-内容" class="headerlink" title="lab1 内容"></a>lab1 内容</h3><p>实现一个MapReduce程序。</p>
 <ul>
-<li>全局队列：存放等待运行的G</li>
-<li>P的本地队列：存放不超过256个的等待运行的G；优先将新创建的G放在P的本地队列，如果都满了就放在全局队列</li>
-<li>P列表：程序启动时创建；最多有GOMAXPROCS个，可以配置；</li>
-<li>M列表：操作系统分配给当前GO程序的内核线程数；可以通过SetMAXThreads函数设置；M有个线程池，可以在一个M阻塞时，创建一个新的M；在M空闲时，可以将该M回收</li>
+<li>程序入口在main文件夹下, main&#x2F;mrcoordinator.go, main&#x2F;mrworker.go</li>
+<li>需要编写的代码在mr文件夹下，mr&#x2F;coordinator.go, mr&#x2F;worker.go, mr&#x2F;rpc.go</li>
 </ul>
-<h3 id="2-2-调度器的设计策略"><a href="#2-2-调度器的设计策略" class="headerlink" title="2.2 调度器的设计策略"></a>2.2 调度器的设计策略</h3><ul>
-<li>复用线程<ul>
-<li>目的：避免频繁创建和销毁线程M</li>
-<li>work stealing机制：当本线程无可运行的G时，先不销毁线程，而是从其他线程绑定的P里偷取G</li>
-<li>hand off机制： 当本线程因为G进行系统调用而阻塞时，该线程释放绑定的P，把P交给其他空闲的线程M继续执行</li>
+<h3 id="lab1-分析"><a href="#lab1-分析" class="headerlink" title="lab1 分析"></a>lab1 分析</h3><p>开始动手写代码之前，必须先把整体框架了解清楚。可以参照mapreduce论文中的架构图。</p>
+<ul>
+<li>首先，从main包入手。<ul>
+<li>mrcoordinator.go为协调器的main入口，其中会调用mr.MakeCoordinator方法生成我们自定义的协调器，并且会循环调用Done()方法来持续检查是否完成所有Task</li>
+<li>mrworker.go为worker的的main入口，其中会加载mrapps文件夹下的mr插件（plugins），之后调用我们自定义的Worker的worker方法。且根据lab要求，worker要单起一个进程，那么Worker方法中则应该采用同步的方式执行task，而不是异步或多线程的执行任务</li>
 </ul>
 </li>
-<li>利用并行<ul>
-<li>GOMAXPROCS设置P的数量，充分利用多核CPU，实现并行处理</li>
+<li>进入mr文件夹下<ul>
+<li>coordinator.go<ul>
+<li>MakeCoordinator方法会创建Coordinator然后调用serve方法，创建goroutine处理RPC</li>
+<li>我们需要实现协调器的功能主要就是亮点：1、向worker分发任务，2、管理任务状态，3、管理超时任务</li>
 </ul>
 </li>
-<li>抢占<ul>
-<li>在coroutine中，一个协程要等待正在执行的另一个协程主动让出CPU才执行</li>
-<li>在go中，一个goroutine最多占用CPU10ms，然后就会被别的goroutine抢占CPU</li>
+<li>worker.go<ul>
+<li>在Worker方法中，我们需要让该worker以循环的方式向协调器索取Task来执行，根据Task类型的不同执行不同的方法。</li>
+<li>尽管worker应该以阻塞的方式执行task，但没必要再执行完task后通知协调器任务完成的这一个动作也阻塞。所以，通知协调器task完成可以用go func异步的来通知，让主线程继续要task来做。</li>
 </ul>
 </li>
-<li>全局G队列<ul>
-<li>当M执行work stealing时，如果从其他P偷不到G时，可以从全局队列获取G</li>
+<li>rpc.go<ul>
+<li>学习lab中给的Example代码，自定义Args和Reply用于RPC调用中的数据保存。第一次看到这种用法，是真的帅。</li>
 </ul>
 </li>
 </ul>
-<h3 id="2-3-go-func-经历了什么过程"><a href="#2-3-go-func-经历了什么过程" class="headerlink" title="2.3 go func() 经历了什么过程"></a>2.3 go func() 经历了什么过程</h3><p><img src="https://cdn.nlark.com/yuque/0/2022/jpeg/26269664/1650776333419-50d3a922-bd53-4bff-b0b6-280e6abc5d74.jpeg?x-oss-process=image/watermark,type_d3F5LW1pY3JvaGVp,size_55,text_5YiY5Li55YawQWNlbGQ=,color_FFFFFF,shadow_50,t_80,g_se,x_10,y_10/resize,w_750,limit_0" srcset="/img/loading.gif" lazyload></p>
-<p>​	1、我们通过 go func()来创建一个goroutine；</p>
-<p>​	2、有两个存储G的队列，一个是局部调度器P的本地队列、一个是全局G队列。新创建的G会先保存在P的本地队列中，如果P的本地队列已经满了就会保存在全局的队列中；</p>
-<p>​	3、G只能运行在M中，一个M必须持有一个P，M与P是1：1的关系。M会从P的本地队列弹出一个可执行状态的G来执行，如果P的本地队列为空，就会想其他的MP组合偷取一个可执行的G来执行；</p>
-<p>​	4、一个M调度G执行的过程是一个循环机制；</p>
-<p>​	5、当M执行某一个G时候如果发生了syscall或则其余阻塞操作，M会阻塞，如果当前有一些G在执行，runtime会把这个线程M从P中摘除(detach)，然后再创建一个新的操作系统的线程(如果有空闲的线程可用就复用空闲线程)来服务于这个P；</p>
-<p>​	6、当M系统调用结束时候，这个G会尝试获取一个空闲的P执行，并放入到这个P的本地队列。如果获取不到P，那么这个线程M变成休眠状态， 加入到空闲线程中，然后这个G会被放入全局队列中。</p>
+</li>
+</ul>
+<h3 id="lab1-总结"><a href="#lab1-总结" class="headerlink" title="lab1 总结"></a>lab1 总结</h3><ul>
+<li>一开始看这个lab一头雾水，不知何处下手。其实关键在于对照着论文里的那个图，并结合lab的说明，分析清楚这个lab的结构。</li>
+<li>虽然是协调器来分发任务，但实际上这个的主动权应该在worker手里。协调器管的功能应该是管好任务的状态，判断超时，判断任务是否全部做完。</li>
+<li>除了获取任务，做任务之外，其他功能都可以做成异步的。比如，协调器派送任务后启动新线程判断超时，worker完成任务后启动新线程通知协调器任务完成。</li>
+</ul>
+<p>做完这个lab后，感觉没有多复杂，然而其实一共写了有5个小时，总共断断续续用了两天。<br>当中大部分的时间都是处在一个完全没有头绪的状态，只得反复的看lab的说明，看代码中的example，借鉴别人的实现。<br>论文写的很清楚，课程讲的也不难，然而想法落地成代码还是一个很困难的事。<br>还是得多学，多写，多总结。</p>
 
                 
               </div>
@@ -346,7 +320,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Golang/">#Golang</a>
+        <a href="/tags/Distributed-System/">#Distributed System</a>
+      
+        <a href="/tags/MIT6-824/">#MIT6.824</a>
       
     </div>
   
@@ -358,8 +334,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Golang-协程调度器GMP</div>
-      <div>http://kun98-liu.gihub.io/2022/08/18/Golang-协程调度器GMP/</div>
+      <div>6.824-lab1</div>
+      <div>http://kun98-liu.gihub.io/2022/09/13/6-824-lab1/</div>
     </div>
     <div class="license-meta">
       
@@ -371,7 +347,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>Posted on</div>
-          <div>August 18, 2022</div>
+          <div>September 13, 2022</div>
         </div>
       
       
@@ -401,18 +377,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/09/13/6-824-lab1/" title="6.824-lab1">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">6.824-lab1</span>
-                        <span class="visible-mobile">Previous</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/08/18/DataStructure-Bitmap/" title="DataStructure-如何通过Bitmap实现亿级数据统计">
-                        <span class="hidden-mobile">DataStructure-如何通过Bitmap实现亿级数据统计</span>
+                      <a href="/2022/08/18/Golang-%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8GMP/" title="Golang-协程调度器GMP">
+                        <span class="hidden-mobile">Golang-协程调度器GMP</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
